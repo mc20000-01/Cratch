@@ -1,0 +1,1 @@
+{"schema_version":2,"name":"bad_branch","entry":"entry_fn","globals":[],"functions":[{"name":"entry_fn","params":[],"return_type":"I32","body":[{"kind":"if","id":"s1","test":{"kind":"int","id":"e1","value":1},"then":[],"otherwise":null},{"kind":"return","id":"s2","value":{"kind":"int","id":"e2","value":0}}]}]}

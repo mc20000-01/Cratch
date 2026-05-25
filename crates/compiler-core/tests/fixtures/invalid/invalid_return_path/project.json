@@ -1,0 +1,1 @@
+{"schema_version":2,"name":"bad_return","entry":"entry_fn","globals":[],"functions":[{"name":"entry_fn","params":[],"return_type":"I32","body":[{"kind":"return","id":"s1","value":null}]}]}
