@@ -1,4 +1,5 @@
 import type { Project } from './types';
+import { deserializeProject, serializeProject } from './migrations';
 
 export type StructuredCompileError = {
   code: string;
@@ -22,13 +23,15 @@ function getWasmCompiler(): CompilerWasmBindings {
 }
 
 export function parseAndValidateProject(project: Project): Project {
-  return getWasmCompiler().parse_and_validate_project_json(JSON.stringify(project)) as Project;
+  return deserializeProject(JSON.stringify(
+    getWasmCompiler().parse_and_validate_project_json(serializeProject(project)),
+  ));
 }
 
 export function compileProjectJsonToC(project: Project): string {
-  return getWasmCompiler().compile_project_json_to_c(JSON.stringify(project));
+  return getWasmCompiler().compile_project_json_to_c(serializeProject(project));
 }
 
 export function compileProjectJsonToCWithErrors(project: Project): CompileResult {
-  return getWasmCompiler().compile_project_json_to_c_with_errors(JSON.stringify(project));
+  return getWasmCompiler().compile_project_json_to_c_with_errors(serializeProject(project));
 }

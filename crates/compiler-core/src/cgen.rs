@@ -45,12 +45,12 @@ fn emit_type(ty: &PrimitiveType) -> &'static str {
 
 fn emit_expr(expr: &Expr) -> String {
     match expr {
-        Expr::Int { value } => value.to_string(),
-        Expr::Float { value } => value.to_string(),
-        Expr::String { value } => format!("{:?}", value),
-        Expr::Bool { value } => value.to_string(),
-        Expr::Ident { name } => name.clone(),
-        Expr::Call { name, args } => format!(
+        Expr::Int { value, .. } => value.to_string(),
+        Expr::Float { value, .. } => value.to_string(),
+        Expr::String { value, .. } => format!("{:?}", value),
+        Expr::Bool { value, .. } => value.to_string(),
+        Expr::Ident { name, .. } => name.clone(),
+        Expr::Call { name, args, .. } => format!(
             "{}({})",
             name,
             args.iter().map(emit_expr).collect::<Vec<_>>().join(", ")
@@ -61,7 +61,7 @@ fn emit_expr(expr: &Expr) -> String {
 fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
     let pad = " ".repeat(indent);
     match stmt {
-        Stmt::Let { name, ty, value } => {
+        Stmt::Let { name, ty, value, .. } => {
             let ty = ty.as_ref().unwrap_or(&PrimitiveType::I32);
             let _ = writeln!(
                 out,
@@ -72,13 +72,13 @@ fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
                 emit_expr(value)
             );
         }
-        Stmt::Assign { name, value } => {
+        Stmt::Assign { name, value, .. } => {
             let _ = writeln!(out, "{}{} = {};", pad, name, emit_expr(value));
         }
-        Stmt::Expr { value } => {
+        Stmt::Expr { value, .. } => {
             let _ = writeln!(out, "{}{};", pad, emit_expr(value));
         }
-        Stmt::Return { value } => match value {
+        Stmt::Return { value, .. } => match value {
             Some(v) => {
                 let _ = writeln!(out, "{}return {};", pad, emit_expr(v));
             }
@@ -90,6 +90,7 @@ fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
             test,
             then,
             otherwise,
+            ..
         } => {
             let _ = writeln!(out, "{}if ({}) {{", pad, emit_expr(test));
             for s in then {
@@ -103,7 +104,7 @@ fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
             }
             let _ = writeln!(out, "{}}}", pad);
         }
-        Stmt::While { test, body } => {
+        Stmt::While { test, body, .. } => {
             let _ = writeln!(out, "{}while ({}) {{", pad, emit_expr(test));
             for s in body {
                 emit_stmt(s, indent + 2, out);
