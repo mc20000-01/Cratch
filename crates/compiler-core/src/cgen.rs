@@ -1,12 +1,42 @@
 use std::fmt::Write;
 
 use crate::ast::{Expr, Project, Stmt};
+use crate::semantics::validate_project;
 use crate::types::PrimitiveType;
 
 #[derive(thiserror::Error, Debug)]
 pub enum CompileError {
     #[error("entry function not found: {0}")]
     MissingEntry(String),
+    #[error("unknown identifier `{name}` at {source_hint}")]
+    UnknownIdentifier { name: String, source_hint: String },
+    #[error("duplicate declaration of `{symbol}` at {source_hint}")]
+    DuplicateDeclaration { symbol: String, source_hint: String },
+    #[error("arity mismatch in call to `{function}` at {source_hint}: expected {expected}, found {found}")]
+    ArityMismatchInCall {
+        function: String,
+        expected: usize,
+        found: usize,
+        source_hint: String,
+    },
+    #[error("type mismatch in call to `{function}` at {source_hint}: {detail}")]
+    TypeMismatchInCall {
+        function: String,
+        detail: String,
+        source_hint: String,
+    },
+    #[error("invalid return type in `{function}` at {source_hint}: expected {expected:?}, found {found:?}")]
+    InvalidReturnType {
+        function: String,
+        expected: PrimitiveType,
+        found: PrimitiveType,
+        source_hint: String,
+    },
+    #[error("non-boolean condition at {source_hint}: found {found:?}")]
+    NonBooleanCondition {
+        found: PrimitiveType,
+        source_hint: String,
+    },
 }
 
 fn emit_type(ty: &PrimitiveType) -> &'static str {
@@ -33,7 +63,14 @@ fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
     match stmt {
         Stmt::Let { name, ty, value } => {
             let ty = ty.as_ref().unwrap_or(&PrimitiveType::I32);
-            let _ = writeln!(out, "{}{} {} = {};", pad, emit_type(ty), name, emit_expr(value));
+            let _ = writeln!(
+                out,
+                "{}{} {} = {};",
+                pad,
+                emit_type(ty),
+                name,
+                emit_expr(value)
+            );
         }
         Stmt::Assign { name, value } => {
             let _ = writeln!(out, "{}{} = {};", pad, name, emit_expr(value));
@@ -41,17 +78,19 @@ fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
         Stmt::Expr { value } => {
             let _ = writeln!(out, "{}{};", pad, emit_expr(value));
         }
-        Stmt::Return { value } => {
-            match value {
-                Some(v) => {
-                    let _ = writeln!(out, "{}return {};", pad, emit_expr(v));
-                }
-                None => {
-                    let _ = writeln!(out, "{}return;", pad);
-                }
+        Stmt::Return { value } => match value {
+            Some(v) => {
+                let _ = writeln!(out, "{}return {};", pad, emit_expr(v));
             }
-        }
-        Stmt::If { test, then, otherwise } => {
+            None => {
+                let _ = writeln!(out, "{}return;", pad);
+            }
+        },
+        Stmt::If {
+            test,
+            then,
+            otherwise,
+        } => {
             let _ = writeln!(out, "{}if ({}) {{", pad, emit_expr(test));
             for s in then {
                 emit_stmt(s, indent + 2, out);
@@ -75,6 +114,8 @@ fn emit_stmt(stmt: &Stmt, indent: usize, out: &mut String) {
 }
 
 pub fn compile_project_to_c(project: &Project) -> Result<String, CompileError> {
+    validate_project(project)?;
+
     if !project.functions.iter().any(|f| f.name == project.entry) {
         return Err(CompileError::MissingEntry(project.entry.clone()));
     }
@@ -103,7 +144,13 @@ pub fn compile_project_to_c(project: &Project) -> Result<String, CompileError> {
             .map(|p| format!("{} {}", emit_type(&p.ty), p.name))
             .collect::<Vec<_>>()
             .join(", ");
-        let _ = writeln!(out, "{} {}({}) {{", emit_type(&f.return_type), f.name, params);
+        let _ = writeln!(
+            out,
+            "{} {}({}) {{",
+            emit_type(&f.return_type),
+            f.name,
+            params
+        );
         for stmt in &f.body {
             emit_stmt(stmt, 2, &mut out);
         }
