@@ -4,13 +4,15 @@
 
   /* Semantic color tokens */
   --color-text-primary: #e8eef7;
-  --color-text-secondary: #8ca1c9;
+  --color-text-secondary: #9eb2d8;
   --color-text-danger: #ff9fa6;
-  --color-text-on-danger: #8b0000;
+  --color-text-disabled: #8392ac;
   --color-border-subtle: #223;
   --color-border-default: #30496f;
   --color-border-muted: #2d3a55;
+  --color-border-disabled: #3a4660;
   --color-border-emphasis: #66a3ff;
+  --color-focus-ring: #9ec1ff;
   --color-border-canvas: #445;
   --color-bg-app: #0b0f14;
   --color-bg-surface: #101722;
@@ -18,8 +20,8 @@
   --color-bg-interactive: #1b2740;
   --color-bg-interactive-strong: #24406f;
   --color-bg-code: #0a1018;
-  --color-bg-danger-surface: #fff4f4;
-  --color-border-danger: #d66;
+  --color-bg-danger-surface: #2b1115;
+  --color-border-danger: #f58c97;
 
   /* Spacing tokens */
   --space-1: 0.375rem;
