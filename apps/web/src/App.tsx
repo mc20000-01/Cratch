@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { defaultBlocks } from './compiler/blocks';
 import { sampleProject } from './compiler/sample';
-import { compileProjectJsonToC } from './compiler/index';
+import { compileProjectJsonToCWithErrors } from './compiler/index';
 
 export default function App() {
   const [project] = useState(sampleProject);
-  const cOut = useMemo(() => compileProjectJsonToC(project), [project]);
+  const compileResult = useMemo(() => compileProjectJsonToCWithErrors(project), [project]);
 
   return (
     <div className="shell">
@@ -33,7 +33,11 @@ export default function App() {
 
         <section className="panel">
           <h2>C Output</h2>
-          <pre>{cOut}</pre>
+          {compileResult.ok ? (
+            <pre>{compileResult.c}</pre>
+          ) : (
+            <pre>{`[${compileResult.error.code}] ${compileResult.error.message}`}</pre>
+          )}
         </section>
       </main>
     </div>

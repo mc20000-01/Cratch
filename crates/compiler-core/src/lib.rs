@@ -1,5 +1,6 @@
 pub mod ast;
 pub mod cgen;
+pub mod semantics;
 pub mod types;
 
 pub use ast::{Expr, FunctionDecl, Project, Stmt};
