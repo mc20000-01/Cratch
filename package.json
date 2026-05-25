@@ -1,0 +1,11 @@
+{
+  "name": "scratch-lowlevel",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev:web": "pnpm --dir apps/web dev",
+    "build:web": "pnpm --dir apps/web build",
+    "dev:desktop": "pnpm --dir apps/desktop tauri dev",
+    "build:desktop": "pnpm --dir apps/desktop tauri build"
+  }
+}

@@ -1,0 +1,56 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, sans-serif;
+  background: #0b0f14;
+  color: #e8eef7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+.panel {
+  padding: 16px;
+  border-right: 1px solid #223;
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+
+.canvas {
+  min-height: 280px;
+  border: 1px dashed #445;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #101722;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 8px 0;
+  display: grid;
+}
+
+pre {
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: #0a1018;
+}
