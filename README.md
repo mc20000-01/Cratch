@@ -41,3 +41,16 @@ Pin dependency versions before shipping.
 
 ## Extension docs
 See `docs/EXTENSIONS.md` for manifest schema, compatibility checks, and failure cases.
+
+
+## Adding compiler fixtures
+Use fixtures to grow the compiler test matrix safely.
+
+1. Add a new case folder under `crates/compiler-core/tests/fixtures/valid/<case>` or `crates/compiler-core/tests/fixtures/invalid/<case>`.
+2. Add `project.json` with the project AST payload.
+3. For valid fixtures, add `expected.c` with the exact C output snapshot.
+4. For invalid fixtures, add `expected.diagnostic` with the exact compiler error text.
+5. Mirror the case in `apps/web/src/compiler/__fixtures__/compiler-fixtures.ts` to keep the wasm bridge integration tests in sync.
+6. Run `cargo test -p compiler-core` and `pnpm --dir apps/web test` before opening a PR.
+
+CI requires both `rust-tests` and `web-tests` jobs to pass for merges.

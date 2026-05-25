@@ -1,0 +1,1 @@
+{"schema_version":2,"name":"globals","entry":"entry_fn","globals":[{"name":"greeting","ty":"String","value":{"kind":"string","id":"e1","value":"hello"}},{"name":"flag","ty":"Bool","value":{"kind":"bool","id":"e2","value":true}}],"functions":[{"name":"entry_fn","params":[],"return_type":"I64","body":[{"kind":"return","id":"s1","value":{"kind":"int","id":"e3","value":0}}]}]}

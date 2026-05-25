@@ -1,0 +1,1 @@
+invalid return type in `entry_fn` at function 'entry_fn' statement #0: expected I32, found Void

@@ -1,0 +1,1 @@
+{"schema_version":2,"name":"branching","entry":"entry_fn","globals":[],"functions":[{"name":"entry_fn","params":[],"return_type":"I64","body":[{"kind":"if","id":"s1","test":{"kind":"bool","id":"e1","value":true},"then":[{"kind":"return","id":"s2","value":{"kind":"int","id":"e2","value":1}}],"otherwise":[{"kind":"return","id":"s3","value":{"kind":"int","id":"e3","value":0}}]}]}]}
