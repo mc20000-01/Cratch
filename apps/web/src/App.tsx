@@ -73,116 +73,153 @@ export default function App() {
 
   return (
     <div className="shell">
-      <aside className="panel">
-        <h1>ScratchLowLevel</h1>
-        <p>Editor-first workflow (compiler output stays debug-only).</p>
-        <div className="project-actions">
-          <button onClick={downloadProject}>Export project</button>
-          <label>
-            Import project
-            <input type="file" accept="application/json" onChange={importProject} />
-          </label>
-        </div>
+      <aside className="panel page-layout">
+        <header className="section-header">
+          <h1>ScratchLowLevel</h1>
+          <p>Editor-first workflow (compiler output stays debug-only).</p>
+        </header>
+
+        <section className="card">
+          <header className="card-header">
+            <h2>Project</h2>
+          </header>
+          <div className="card-body">
+            <div className="project-actions">
+              <button className="button-primary" onClick={downloadProject}>
+                Export project
+              </button>
+              <label className="button-ghost">
+                Import project
+                <input type="file" accept="application/json" onChange={importProject} />
+              </label>
+            </div>
+          </div>
+        </section>
+
         {projectError ? (
           <p className="error-banner" role="alert">
             {projectError}
           </p>
         ) : null}
-        <h2>Palette</h2>
-        <div className="palette">
-          {paletteKinds.map((kind) => (
-            <button
-              key={kind}
-              draggable
-              onDragStart={(event) => event.dataTransfer.setData('application/block-kind', kind)}
-              onClick={() => editorStore.insertBlock(kind, state.selectedId)}
-            >
-              + {kind}
-            </button>
-          ))}
-        </div>
-        <h2>Extensions</h2>
-        <ul>
-          {blocks.map((block) => (
-            <li key={block.id}>
-              <strong>{block.name}</strong>
-              <span>{block.kind}</span>
-            </li>
-          ))}
-        </ul>
-      </aside>
 
-      <main className="workspace">
-        <section className="panel">
-          <h2>Workspace Graph</h2>
-          <div
-            className="canvas"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(event) => {
-              event.preventDefault();
-              const kind = event.dataTransfer.getData('application/block-kind') as BlockKind;
-              if (kind) editorStore.insertBlock(kind, state.selectedId);
-            }}
-          >
-            {orderedNodes.map((node, idx) => (
-              <div
-                key={node.id}
-                className={`node ${state.selectedId === node.id ? 'selected' : ''}`}
-                onClick={() => editorStore.select(node.id)}
+        <section className="card">
+          <header className="card-header">
+            <h2>Palette</h2>
+          </header>
+          <div className="card-body palette">
+            {paletteKinds.map((kind) => (
+              <button
+                className="button-primary"
+                key={kind}
                 draggable
-                onDragStart={(event) => event.dataTransfer.setData('application/move-id', node.id)}
-                onDrop={(event) => {
-                  const moveId = event.dataTransfer.getData('application/move-id');
-                  if (moveId) editorStore.moveBlock(moveId, idx);
-                  const connectFrom = event.dataTransfer.getData('application/connect-from');
-                  if (connectFrom) editorStore.connectBlocks(connectFrom, node.id);
-                }}
-                onDragOver={(event) => event.preventDefault()}
+                onDragStart={(event) => event.dataTransfer.setData('application/block-kind', kind)}
+                onClick={() => editorStore.insertBlock(kind, state.selectedId)}
               >
-                <div>
-                  <strong>{node.label}</strong> <small>{node.id}</small>
-                </div>
-                <div className="node-actions">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      editorStore.deleteBlock(node.id);
-                    }}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    draggable
-                    onDragStart={(e) => {
-                      e.stopPropagation();
-                      e.dataTransfer.setData('application/connect-from', node.id);
-                    }}
-                  >
-                    Connect →
-                  </button>
-                </div>
-              </div>
+                + {kind}
+              </button>
             ))}
           </div>
-          <p className="hint">Keyboard: ↑/↓ move, Del delete, Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo.</p>
         </section>
 
-        <section className="panel diagnostics">
-          <h2>Diagnostics</h2>
-          {state.diagnostics.length === 0 ? (
-            <p>No issues.</p>
-          ) : (
+        <section className="card">
+          <header className="card-header">
+            <h2>Extensions</h2>
+          </header>
+          <div className="card-body">
             <ul>
-              {state.diagnostics.map((d, i) => (
-                <li key={`${d.message}-${i}`}>
-                  {d.nodeId ? `${d.nodeId}: ` : ''}
-                  {d.message}
+              {blocks.map((block) => (
+                <li key={block.id}>
+                  <strong>{block.name}</strong>
+                  <span>{block.kind}</span>
                 </li>
               ))}
             </ul>
-          )}
-          <h3>Generated C (debug)</h3>
-          <pre>{state.debugCOutput || '// build failed or no output yet'}</pre>
+          </div>
+        </section>
+      </aside>
+
+      <main className="workspace">
+        <section className="panel card">
+          <header className="card-header">
+            <h2>Workspace Graph</h2>
+          </header>
+          <div className="card-body">
+            <div
+              className="canvas"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                const kind = event.dataTransfer.getData('application/block-kind') as BlockKind;
+                if (kind) editorStore.insertBlock(kind, state.selectedId);
+              }}
+            >
+              {orderedNodes.map((node, idx) => (
+                <div
+                  key={node.id}
+                  className={`node ${state.selectedId === node.id ? 'selected' : ''}`}
+                  onClick={() => editorStore.select(node.id)}
+                  draggable
+                  onDragStart={(event) => event.dataTransfer.setData('application/move-id', node.id)}
+                  onDrop={(event) => {
+                    const moveId = event.dataTransfer.getData('application/move-id');
+                    if (moveId) editorStore.moveBlock(moveId, idx);
+                    const connectFrom = event.dataTransfer.getData('application/connect-from');
+                    if (connectFrom) editorStore.connectBlocks(connectFrom, node.id);
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                >
+                  <div>
+                    <strong>{node.label}</strong> <small>{node.id}</small>
+                  </div>
+                  <div className="node-actions">
+                    <button
+                      className="button-ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        editorStore.deleteBlock(node.id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="button-primary"
+                      draggable
+                      onDragStart={(e) => {
+                        e.stopPropagation();
+                        e.dataTransfer.setData('application/connect-from', node.id);
+                      }}
+                    >
+                      Connect →
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="hint">Keyboard: ↑/↓ move, Del delete, Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo.</p>
+          </div>
+          <footer className="card-footer">Drag blocks from palette to build control flow.</footer>
+        </section>
+
+        <section className="panel diagnostics card">
+          <header className="card-header">
+            <h2>Diagnostics</h2>
+          </header>
+          <div className="card-body">
+            {state.diagnostics.length === 0 ? (
+              <p>No issues.</p>
+            ) : (
+              <ul>
+                {state.diagnostics.map((d, i) => (
+                  <li key={`${d.message}-${i}`}>
+                    {d.nodeId ? `${d.nodeId}: ` : ''}
+                    {d.message}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <h3>Generated C (debug)</h3>
+            <pre>{state.debugCOutput || '// build failed or no output yet'}</pre>
+          </div>
         </section>
       </main>
     </div>

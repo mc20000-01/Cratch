@@ -11,6 +11,8 @@
 
 body {
   margin: 0;
+  font-size: var(--font-size-body-md);
+  line-height: 1.5;
 }
 
 .shell {
@@ -22,6 +24,36 @@ body {
 .panel {
   padding: var(--space-5);
   border-right: 1px solid var(--color-border-subtle);
+}
+
+.page-layout {
+  display: grid;
+  gap: var(--space-5);
+  align-content: start;
+}
+
+.section-header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+}
+
+h3 {
+  font-size: var(--font-size-h3);
 }
 
 .workspace {
@@ -53,6 +85,46 @@ button {
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-3);
   cursor: pointer;
+}
+
+.button-primary {
+  background: var(--color-bg-interactive-strong);
+  border-color: var(--color-border-emphasis);
+}
+
+.button-ghost {
+  background: transparent;
+  border-color: var(--color-border-muted);
+  color: var(--color-text-secondary);
+}
+
+.card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.card-header,
+.card-body,
+.card-footer {
+  padding: var(--space-4) var(--space-5);
+}
+
+.card-header {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.card-body {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.card-footer {
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
 }
 
 .node {
@@ -108,7 +180,6 @@ pre {
   display: flex;
   gap: var(--space-2);
   align-items: center;
-  margin-bottom: var(--space-2);
 }
 
 .project-actions input {
