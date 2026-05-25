@@ -1,4 +1,4 @@
-use compiler_core::{compile_project_to_c, Project};
+use compiler_core::{compile_project_to_c, ensure_compatible_api_version, EXTENSION_API_VERSION, Project};
 use tauri::Manager;
 
 #[tauri::command]
@@ -8,6 +8,8 @@ fn compile_json_to_c(json: String) -> Result<String, String> {
 }
 
 fn main() {
+    ensure_compatible_api_version(EXTENSION_API_VERSION).expect("host extension API compatibility check failed");
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![compile_json_to_c])
         .run(tauri::generate_context!())

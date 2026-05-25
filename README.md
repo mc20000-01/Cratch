@@ -37,3 +37,7 @@ crates/
 ## Notes
 This is a scaffold, not a finished product.
 Pin dependency versions before shipping.
+
+
+## Extension docs
+See `docs/EXTENSIONS.md` for manifest schema, compatibility checks, and failure cases.
