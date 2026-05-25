@@ -1,6 +1,9 @@
-# ScratchLowLevel Scaffold
+# ScratchLowLevel
 
-A block-based, low-level programming scaffold for **web + desktop**.
+A block-based, low-level programming project with:
+
+- a browser app (GitHub Pages deploy)
+- desktop apps (Linux, Windows, macOS via Tauri releases)
 
 ## Stack
 
@@ -10,15 +13,60 @@ A block-based, low-level programming scaffold for **web + desktop**.
 - **Shared model**: JSON AST/Project format
 - **Future path**: wasm build for browser-side compilation
 
-## What this scaffold includes
+## Run locally
 
-- block registry
-- extension manifest schema
-- typed project model
-- Rust compiler core that emits C
-- Tauri desktop command stubs
-- React workspace/palette/editor shell
-- project export/import wiring
+```bash
+pnpm install
+pnpm dev:web
+```
+
+Desktop dev:
+
+```bash
+pnpm dev:desktop
+```
+
+## Build locally
+
+Web build:
+
+```bash
+pnpm build:web
+```
+
+Desktop bundle for your current OS:
+
+```bash
+pnpm build:desktop
+```
+
+## GitHub Pages setup (real website)
+
+1. Push this repo to GitHub as **Cratch** under your account/org.
+2. In **Settings → Pages**, set **Source** to **GitHub Actions**.
+3. Push to `main` (or run the `web-release` workflow manually).
+4. The site is deployed from `apps/web/dist` to:
+   - `https://<owner>.github.io/Cratch/`
+
+Notes:
+
+- Vite production base path is set to `/Cratch/`.
+- If you rename the repo, update `apps/web/vite.config.ts` base path.
+
+## Desktop builds for Linux, Windows, macOS
+
+Create a git tag to trigger release builds on all three platforms:
+
+```bash
+git tag desktop-v0.1.0
+git push origin desktop-v0.1.0
+```
+
+The `desktop-release` workflow builds and publishes Tauri bundles for:
+
+- Ubuntu (Linux)
+- Windows
+- macOS
 
 ## Repo layout
 
@@ -31,31 +79,15 @@ crates/
   compiler-wasm/  browser bridge (stub)
 ```
 
-## Next steps
-
-1. Run `cargo test -p compiler-core`
-2. Hook the React editor to the shared project model
-3. Add wasm build for browser compilation
-4. Add optimization passes and ASM backend
-
-## Notes
-
-This is a scaffold, not a finished product.
-Pin dependency versions before shipping.
-
 ## Extension docs
 
 See `docs/EXTENSIONS.md` for manifest schema, compatibility checks, and failure cases.
 
 ## Adding compiler fixtures
 
-Use fixtures to grow the compiler test matrix safely.
-
 1. Add a new case folder under `crates/compiler-core/tests/fixtures/valid/<case>` or `crates/compiler-core/tests/fixtures/invalid/<case>`.
 2. Add `project.json` with the project AST payload.
 3. For valid fixtures, add `expected.c` with the exact C output snapshot.
 4. For invalid fixtures, add `expected.diagnostic` with the exact compiler error text.
-5. Mirror the case in `apps/web/src/compiler/__fixtures__/compiler-fixtures.ts` to keep the wasm bridge integration tests in sync.
+5. Mirror the case in `apps/web/src/compiler/__fixtures__/compiler-fixtures.ts` to keep wasm bridge integration tests in sync.
 6. Run `cargo test -p compiler-core` and `pnpm --dir apps/web test` before opening a PR.
-
-CI requires both `rust-tests` and `web-tests` jobs to pass for merges.
