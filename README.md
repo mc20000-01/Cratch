@@ -13,17 +13,115 @@ A block-based, low-level programming project with:
 - **Shared model**: JSON AST/Project format
 - **Future path**: wasm build for browser-side compilation
 
-## Run locally
+## Developer entrypoint
+
+Use one command to start core developer services:
 
 ```bash
-pnpm install
-pnpm dev:web
+pnpm dev
 ```
 
-Desktop dev:
+This launches the web app dev server (`pnpm dev:web`).
+
+If you also need desktop development, run this in a second terminal:
 
 ```bash
 pnpm dev:desktop
+```
+
+## Daily workflow
+
+1. **Setup**
+   ```bash
+   pnpm install
+   ```
+2. **Run**
+   ```bash
+   pnpm dev
+   ```
+3. **Check**
+   ```bash
+   pnpm check
+   ```
+4. **Submit**
+   - Commit only after checks pass.
+   - Push your branch and open/update PR.
+
+## Quality gates (must pass before merge)
+
+Run all quality gates:
+
+```bash
+pnpm check
+```
+
+This includes:
+
+- **Format**: `pnpm format:check`
+- **Lint**: `pnpm lint`
+- **Type-check**: `pnpm typecheck`
+- **Test**: `pnpm test`
+
+### Pass criteria
+
+A change is merge-ready only when:
+
+- all four gates exit with code `0`
+- there are no lint errors
+- type-check has no TypeScript errors
+- test suite reports no failing tests
+
+## Git hooks
+
+Hooks are managed with Husky.
+
+- **pre-commit** (fast): runs `pnpm lint-staged` to quickly format/fix staged files.
+- **pre-push** (heavier): runs `pnpm check` to enforce full quality gates before code leaves your machine.
+
+If hooks are missing after install, run:
+
+```bash
+pnpm prepare
+```
+
+## Troubleshooting
+
+### `pnpm: command not found`
+
+Install pnpm (for example via Corepack):
+
+```bash
+corepack enable
+corepack prepare pnpm@9.0.0 --activate
+```
+
+### Dependencies fail to install or lockfile mismatch
+
+Try a clean reinstall:
+
+```bash
+rm -rf node_modules apps/web/node_modules
+pnpm install
+```
+
+### Tauri desktop dev fails to start
+
+- Ensure Rust toolchain is installed (`rustup` + `cargo`).
+- Install OS dependencies required by Tauri (WebKitGTK/build essentials on Linux).
+- Validate toolchains:
+
+```bash
+rustc --version
+cargo --version
+pnpm --dir apps/desktop tauri --version
+```
+
+### Port already in use for web dev server
+
+Start Vite on another port:
+
+```bash
+pnpm --dir apps/web dev -- --port 5174
 ```
 
 ## Build locally
