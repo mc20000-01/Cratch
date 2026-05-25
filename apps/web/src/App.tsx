@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { defaultBlocks } from './compiler/blocks';
 import { sampleProject } from './compiler/sample';
-import { compileProjectToC } from './compiler/index';
+import { compileProjectJsonToC } from './compiler/index';
 
 export default function App() {
   const [project] = useState(sampleProject);
-  const cOut = useMemo(() => compileProjectToC(project), [project]);
+  const cOut = useMemo(() => compileProjectJsonToC(project), [project]);
 
   return (
     <div className="shell">

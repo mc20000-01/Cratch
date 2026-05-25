@@ -1,18 +1,7 @@
 export type PrimitiveType =
-  | 'void'
-  | 'bool'
-  | 'i8'
-  | 'i16'
-  | 'i32'
-  | 'i64'
-  | 'u8'
-  | 'u16'
-  | 'u32'
-  | 'u64'
-  | 'f32'
-  | 'f64'
-  | 'string'
-  | 'ptr';
+  | 'void' | 'bool' | 'i8' | 'i16' | 'i32' | 'i64'
+  | 'u8' | 'u16' | 'u32' | 'u64'
+  | 'f32' | 'f64' | 'string' | 'ptr';
 
 export type Expr =
   | { kind: 'int'; value: number }
@@ -23,7 +12,7 @@ export type Expr =
   | { kind: 'call'; name: string; args: Expr[] };
 
 export type Stmt =
-  | { kind: 'let'; name: string; value: Expr; type?: PrimitiveType }
+  | { kind: 'let'; name: string; value: Expr; ty?: PrimitiveType }
   | { kind: 'assign'; name: string; value: Expr }
   | { kind: 'expr'; value: Expr }
   | { kind: 'return'; value?: Expr }
@@ -32,14 +21,14 @@ export type Stmt =
 
 export type FunctionDecl = {
   name: string;
-  params: { name: string; type: PrimitiveType }[];
-  returnType: PrimitiveType;
+  params: { name: string; ty: PrimitiveType }[];
+  return_type: PrimitiveType;
   body: Stmt[];
 };
 
 export type Project = {
   name: string;
-  globals: { name: string; type: PrimitiveType; value?: Expr }[];
+  globals: { name: string; ty: PrimitiveType; value?: Expr }[];
   functions: FunctionDecl[];
   entry: string;
 };
