@@ -14,6 +14,7 @@ export default function App() {
     [state.graph.nodes],
   );
   const [projectError, setProjectError] = useState<string>();
+  const importErrorId = 'project-import-error';
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -90,14 +91,20 @@ export default function App() {
               </button>
               <label className="button-ghost">
                 Import project
-                <input type="file" accept="application/json" onChange={importProject} />
+                <input
+                  type="file"
+                  accept="application/json"
+                  onChange={importProject}
+                  aria-invalid={projectError ? 'true' : 'false'}
+                  aria-describedby={projectError ? importErrorId : undefined}
+                />
               </label>
             </div>
           </div>
         </section>
 
         {projectError ? (
-          <p className="error-banner" role="alert">
+          <p id={importErrorId} className="error-banner" role="alert">
             {projectError}
           </p>
         ) : null}
@@ -157,7 +164,16 @@ export default function App() {
                 <div
                   key={node.id}
                   className={`node ${state.selectedId === node.id ? 'selected' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Select ${node.label} ${node.id}`}
                   onClick={() => editorStore.select(node.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      editorStore.select(node.id);
+                    }
+                  }}
                   draggable
                   onDragStart={(event) => event.dataTransfer.setData('application/move-id', node.id)}
                   onDrop={(event) => {

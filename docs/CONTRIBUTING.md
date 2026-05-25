@@ -20,3 +20,4 @@
 - Web release tags: `web-vX.Y.Z`
 - Desktop release tags: `desktop-vX.Y.Z`
 - CI generates changelog and release notes from tags.
+- Release QA must include `docs/accessibility-checklist.md` sign-off.

@@ -1,11 +1,26 @@
 import { readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-const raw = execSync("rg --files src -g '*.{css,ts,tsx}'", { encoding: 'utf8' });
-const files = raw
-  .split('\n')
-  .map((line) => line.trim())
-  .filter(Boolean)
+const walk = (dir) => {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  const paths = [];
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      paths.push(...walk(fullPath));
+      continue;
+    }
+    if (entry.isFile()) {
+      const normalized = fullPath.split('\\').join('/');
+      paths.push(normalized);
+    }
+  }
+  return paths;
+};
+
+const files = walk('src')
+  .filter((file) => /\.(css|ts|tsx)$/.test(file))
   .filter((file) => file !== 'src/tokens.css')
   .filter((file) => !file.endsWith('.test.ts'))
   .filter((file) => !file.includes('/__fixtures__/'));
