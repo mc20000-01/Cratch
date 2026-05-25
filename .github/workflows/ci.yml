@@ -17,3 +17,42 @@ jobs:
       - run: pnpm test
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test -p compiler-core
+
+  visual-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir apps/web exec playwright install --with-deps chromium
+      - run: pnpm --dir apps/web test:visual
+
+  visual-approval-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map((label) => label.name);
+            const hasApproval = labels.includes('visual-approved');
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            const uiChanged = files.some((file) =>
+              file.filename.startsWith('apps/web/src/') ||
+              file.filename.startsWith('apps/web/visual-tests/__snapshots__/')
+            );
+            if (uiChanged && !hasApproval) {
+              core.setFailed('UI-impacting changes require the visual-approved label after reviewing visual diffs.');
+            }
