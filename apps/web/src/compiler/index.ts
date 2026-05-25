@@ -14,13 +14,30 @@ type CompilerWasmBindings = {
   compile_project_json_to_c_with_errors: (json: string) => CompileResult;
 };
 
+function createFallbackCompiler(): CompilerWasmBindings {
+  const unavailable = {
+    code: 'COMPILER_WASM_UNAVAILABLE',
+    message: 'compiler-wasm bindings are not initialized on globalThis.__SCRATCHLOWLEVEL_COMPILER_WASM__.',
+  };
+
+  return {
+    parse_and_validate_project_json: (json: string) => JSON.parse(json),
+    compile_project_json_to_c: () => `/* ${unavailable.code}: ${unavailable.message} */`,
+    compile_project_json_to_c_with_errors: () => ({ ok: false, error: unavailable }),
+  };
+}
+
 function getWasmCompiler(): CompilerWasmBindings {
   const compiler = (globalThis as { __SCRATCHLOWLEVEL_COMPILER_WASM__?: CompilerWasmBindings })
     .__SCRATCHLOWLEVEL_COMPILER_WASM__;
-  if (!compiler)
-    throw new Error(
-      'compiler-wasm bindings are not initialized on globalThis.__SCRATCHLOWLEVEL_COMPILER_WASM__.',
+
+  if (!compiler) {
+    console.warn(
+      'compiler-wasm bindings are not initialized on globalThis.__SCRATCHLOWLEVEL_COMPILER_WASM__; using fallback compiler.',
     );
+    return createFallbackCompiler();
+  }
+
   return compiler;
 }
 

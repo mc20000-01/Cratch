@@ -7,13 +7,15 @@
     "build:web": "pnpm --dir apps/web build",
     "dev:desktop": "pnpm --dir apps/desktop tauri dev",
     "build:desktop": "pnpm --dir apps/desktop tauri build",
-    "lint": "eslint \"apps/web/src/**/*.{ts,tsx}\" && pnpm --dir apps/web lint:styles",
+    "lint": "pnpm dlx eslint@8 \"apps/web/src/**/*.{ts,tsx}\" && pnpm --dir apps/web lint:styles",
     "format": "prettier --write \"{apps,docs,.github}/**/*.{ts,tsx,js,json,md,yml,yaml}\" \"*.{json,md}\"",
     "format:check": "prettier --check \"{apps,docs,.github}/**/*.{ts,tsx,js,json,md,yml,yaml}\" \"*.{json,md}\"",
     "typecheck": "pnpm --dir apps/web exec tsc --noEmit",
     "test": "pnpm --dir apps/web test",
     "changelog": "git cliff -o CHANGELOG.md || echo \"git-cliff not installed\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev": "pnpm dev:web",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
