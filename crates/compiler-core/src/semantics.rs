@@ -105,7 +105,7 @@ fn validate_stmt(
     ctx: &mut Context<'_>,
 ) -> Result<(), CompileError> {
     match stmt {
-        Stmt::Let { name, ty, value } => {
+        Stmt::Let { name, ty, value, .. } => {
             let inferred = infer_expr_type(value, stmt_index, ctx)?;
             if let Some(explicit_ty) = ty {
                 if explicit_ty != &inferred {
@@ -127,7 +127,7 @@ fn validate_stmt(
                 });
             }
         }
-        Stmt::Assign { name, value } => {
+        Stmt::Assign { name, value, .. } => {
             let existing_ty = ctx.resolve_ident(name).cloned().ok_or_else(|| {
                 CompileError::UnknownIdentifier {
                     name: name.clone(),
@@ -143,10 +143,10 @@ fn validate_stmt(
                 });
             }
         }
-        Stmt::Expr { value } => {
+        Stmt::Expr { value, .. } => {
             let _ = infer_expr_type(value, stmt_index, ctx)?;
         }
-        Stmt::Return { value } => {
+        Stmt::Return { value, .. } => {
             let return_ty = match value {
                 Some(v) => infer_expr_type(v, stmt_index, ctx)?,
                 None => PrimitiveType::Void,
@@ -164,6 +164,7 @@ fn validate_stmt(
             test,
             then,
             otherwise,
+            ..
         } => {
             validate_condition(test, stmt_index, ctx)?;
             validate_stmts(then, ctx)?;
@@ -171,7 +172,7 @@ fn validate_stmt(
                 validate_stmts(otherwise, ctx)?;
             }
         }
-        Stmt::While { test, body } => {
+        Stmt::While { test, body, .. } => {
             validate_condition(test, stmt_index, ctx)?;
             validate_stmts(body, ctx)?;
         }
@@ -204,7 +205,7 @@ fn infer_expr_type(
         Expr::Float { .. } => PrimitiveType::F64,
         Expr::String { .. } => PrimitiveType::String,
         Expr::Bool { .. } => PrimitiveType::Bool,
-        Expr::Ident { name } => {
+        Expr::Ident { name, .. } => {
             ctx.resolve_ident(name)
                 .cloned()
                 .ok_or_else(|| CompileError::UnknownIdentifier {
@@ -212,7 +213,7 @@ fn infer_expr_type(
                     source_hint: ctx.source_hint(stmt_index),
                 })?
         }
-        Expr::Call { name, args } => {
+        Expr::Call { name, args, .. } => {
             let sig = ctx
                 .functions
                 .get(name)
