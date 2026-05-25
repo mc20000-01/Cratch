@@ -193,3 +193,7 @@ See `docs/EXTENSIONS.md` for manifest schema, compatibility checks, and failure 
 ## Design system
 
 Frontend style tokens and usage guidance are documented in `docs/design-system.md`.
+
+## UI previews and visual regression
+
+See `docs/visual-regression.md` for Storybook previews, screenshot testing, CI gating, and snapshot update policy.
