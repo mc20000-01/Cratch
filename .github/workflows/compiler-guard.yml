@@ -1,0 +1,17 @@
+name: frontend-compiler-guard
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  guard-local-compiler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if frontend-local compiler code reappears
+        run: |
+          if rg -n "emitStmt|compileProjectToC" apps/web/src/compiler; then
+            echo "Frontend-local compiler emitter code detected. Use compiler-wasm adapter only."
+            exit 1
+          fi
