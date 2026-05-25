@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { defaultBlocks } from './compiler/blocks';
+import { loadBlocksFromManifests } from './compiler/extensions';
 import { sampleProject } from './compiler/sample';
 import { compileProjectJsonToCWithErrors } from './compiler/index';
 
 export default function App() {
   const [project] = useState(sampleProject);
+  const blocks = useMemo(() => loadBlocksFromManifests([]), []);
   const compileResult = useMemo(() => compileProjectJsonToCWithErrors(project), [project]);
 
   return (
@@ -14,7 +15,7 @@ export default function App() {
         <p>Block-based compiler front end.</p>
         <h2>Blocks</h2>
         <ul>
-          {defaultBlocks.map((block) => (
+          {blocks.map((block) => (
             <li key={block.id}>
               <strong>{block.name}</strong>
               <span>{block.kind}</span>
