@@ -230,3 +230,65 @@ pre {
   border-radius: var(--radius-sm);
   background: var(--color-bg-danger-surface);
 }
+
+.node-title {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.node-kind {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill, 999px);
+  font-size: var(--font-size-body-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--color-border-muted);
+  color: var(--color-text-secondary);
+}
+
+.tone-control {
+  border-left: 4px solid #f1a208;
+}
+
+.tone-expression {
+  border-left: 4px solid #6ab04c;
+}
+
+.tone-data {
+  border-left: 4px solid #2d98da;
+}
+
+.tone-output {
+  border-left: 4px solid #9b59b6;
+}
+
+.empty-workspace {
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-border-muted);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  .workspace {
+    grid-template-rows: auto;
+  }
+
+  .node {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+}

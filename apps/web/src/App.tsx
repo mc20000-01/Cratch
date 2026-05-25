@@ -6,6 +6,15 @@ import { exportProject, validateImportedProject } from './project-io';
 
 const paletteKinds: BlockKind[] = ['let', 'assign', 'expr', 'if', 'while', 'return'];
 
+const blockToneByKind: Record<BlockKind, string> = {
+  let: 'tone-data',
+  assign: 'tone-data',
+  expr: 'tone-expression',
+  if: 'tone-control',
+  while: 'tone-control',
+  return: 'tone-output',
+};
+
 export default function App() {
   const blocks = useMemo(() => loadBlocksFromManifests([]), []);
   const state = useSyncExternalStore(editorStore.subscribe, editorStore.getSnapshot);
@@ -160,10 +169,13 @@ export default function App() {
                 if (kind) editorStore.insertBlock(kind, state.selectedId);
               }}
             >
+              {orderedNodes.length === 0 ? (
+                <p className="empty-workspace">Drop blocks here to start building a flow.</p>
+              ) : null}
               {orderedNodes.map((node, idx) => (
                 <div
                   key={node.id}
-                  className={`node ${state.selectedId === node.id ? 'selected' : ''}`}
+                  className={`node ${blockToneByKind[node.kind]} ${state.selectedId === node.id ? 'selected' : ''}`}
                   role="button"
                   tabIndex={0}
                   aria-label={`Select ${node.label} ${node.id}`}
@@ -184,7 +196,8 @@ export default function App() {
                   }}
                   onDragOver={(event) => event.preventDefault()}
                 >
-                  <div>
+                  <div className="node-title">
+                    <span className="node-kind">{node.kind}</span>
                     <strong>{node.label}</strong> <small>{node.id}</small>
                   </div>
                   <div className="node-actions">
