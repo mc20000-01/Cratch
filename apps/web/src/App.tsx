@@ -1,14 +1,19 @@
-import { useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { loadBlocksFromManifests } from './compiler/extensions';
 import { compileProjectJsonToCWithErrors } from './compiler/index';
 import { editorStore, type BlockKind } from './editor';
+import { exportProject, validateImportedProject } from './project-io';
 
 const paletteKinds: BlockKind[] = ['let', 'assign', 'expr', 'if', 'while', 'return'];
 
 export default function App() {
   const blocks = useMemo(() => loadBlocksFromManifests([]), []);
   const state = useSyncExternalStore(editorStore.subscribe, editorStore.getSnapshot);
-  const orderedNodes = useMemo(() => Object.values(state.graph.nodes).sort((a, b) => a.order - b.order), [state.graph.nodes]);
+  const orderedNodes = useMemo(
+    () => Object.values(state.graph.nodes).sort((a, b) => a.order - b.order),
+    [state.graph.nodes],
+  );
+  const [projectError, setProjectError] = useState<string>();
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -22,6 +27,31 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [state.version, state.project]);
 
+  const downloadProject = () => {
+    const blob = new Blob([exportProject(state.project)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${state.project.name || 'project'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importProject = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text) as unknown;
+      const project = validateImportedProject(parsed);
+      editorStore.replaceProject(project);
+      setProjectError(undefined);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown project import error.';
+      setProjectError(`Import failed: ${message}`);
+    }
+  };
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
@@ -34,7 +64,8 @@ export default function App() {
       const idx = orderedNodes.findIndex((n) => n.id === state.selectedId);
       if (event.key === 'Delete' || event.key === 'Backspace') editorStore.deleteBlock(state.selectedId);
       if (event.key === 'ArrowUp' && idx > 0) editorStore.moveBlock(state.selectedId, idx - 1);
-      if (event.key === 'ArrowDown' && idx >= 0 && idx < orderedNodes.length - 1) editorStore.moveBlock(state.selectedId, idx + 1);
+      if (event.key === 'ArrowDown' && idx >= 0 && idx < orderedNodes.length - 1)
+        editorStore.moveBlock(state.selectedId, idx + 1);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -45,26 +76,54 @@ export default function App() {
       <aside className="panel">
         <h1>ScratchLowLevel</h1>
         <p>Editor-first workflow (compiler output stays debug-only).</p>
+        <div className="project-actions">
+          <button onClick={downloadProject}>Export project</button>
+          <label>
+            Import project
+            <input type="file" accept="application/json" onChange={importProject} />
+          </label>
+        </div>
+        {projectError ? (
+          <p className="error-banner" role="alert">
+            {projectError}
+          </p>
+        ) : null}
         <h2>Palette</h2>
         <div className="palette">
           {paletteKinds.map((kind) => (
-            <button key={kind} draggable onDragStart={(event) => event.dataTransfer.setData('application/block-kind', kind)} onClick={() => editorStore.insertBlock(kind, state.selectedId)}>
+            <button
+              key={kind}
+              draggable
+              onDragStart={(event) => event.dataTransfer.setData('application/block-kind', kind)}
+              onClick={() => editorStore.insertBlock(kind, state.selectedId)}
+            >
               + {kind}
             </button>
           ))}
         </div>
         <h2>Extensions</h2>
-        <ul>{blocks.map((block) => <li key={block.id}><strong>{block.name}</strong><span>{block.kind}</span></li>)}</ul>
+        <ul>
+          {blocks.map((block) => (
+            <li key={block.id}>
+              <strong>{block.name}</strong>
+              <span>{block.kind}</span>
+            </li>
+          ))}
+        </ul>
       </aside>
 
       <main className="workspace">
         <section className="panel">
           <h2>Workspace Graph</h2>
-          <div className="canvas" onDragOver={(e) => e.preventDefault()} onDrop={(event) => {
-            event.preventDefault();
-            const kind = event.dataTransfer.getData('application/block-kind') as BlockKind;
-            if (kind) editorStore.insertBlock(kind, state.selectedId);
-          }}>
+          <div
+            className="canvas"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              const kind = event.dataTransfer.getData('application/block-kind') as BlockKind;
+              if (kind) editorStore.insertBlock(kind, state.selectedId);
+            }}
+          >
             {orderedNodes.map((node, idx) => (
               <div
                 key={node.id}
@@ -80,10 +139,27 @@ export default function App() {
                 }}
                 onDragOver={(event) => event.preventDefault()}
               >
-                <div><strong>{node.label}</strong> <small>{node.id}</small></div>
+                <div>
+                  <strong>{node.label}</strong> <small>{node.id}</small>
+                </div>
                 <div className="node-actions">
-                  <button onClick={(e) => { e.stopPropagation(); editorStore.deleteBlock(node.id); }}>Delete</button>
-                  <button draggable onDragStart={(e) => { e.stopPropagation(); e.dataTransfer.setData('application/connect-from', node.id); }}>Connect →</button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      editorStore.deleteBlock(node.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    draggable
+                    onDragStart={(e) => {
+                      e.stopPropagation();
+                      e.dataTransfer.setData('application/connect-from', node.id);
+                    }}
+                  >
+                    Connect →
+                  </button>
                 </div>
               </div>
             ))}
@@ -93,7 +169,18 @@ export default function App() {
 
         <section className="panel diagnostics">
           <h2>Diagnostics</h2>
-          {state.diagnostics.length === 0 ? <p>No issues.</p> : <ul>{state.diagnostics.map((d, i) => <li key={`${d.message}-${i}`}>{d.nodeId ? `${d.nodeId}: ` : ''}{d.message}</li>)}</ul>}
+          {state.diagnostics.length === 0 ? (
+            <p>No issues.</p>
+          ) : (
+            <ul>
+              {state.diagnostics.map((d, i) => (
+                <li key={`${d.message}-${i}`}>
+                  {d.nodeId ? `${d.nodeId}: ` : ''}
+                  {d.message}
+                </li>
+              ))}
+            </ul>
+          )}
           <h3>Generated C (debug)</h3>
           <pre>{state.debugCOutput || '// build failed or no output yet'}</pre>
         </section>

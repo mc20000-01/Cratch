@@ -14,7 +14,7 @@ export const sampleProject: Project = {
       return_type: 'i32',
       body: [
         { kind: 'let', id: 'stmt_1', name: 'x', ty: 'i32', value: { kind: 'int', id: 'expr_2', value: 42 } },
-        { kind: 'return', id: 'stmt_2', value: { kind: 'ident', id: 'expr_3', name: 'x' } }
+        { kind: 'return', id: 'stmt_2', value: { kind: 'ident', id: 'expr_3', name: 'x' } },
       ],
     },
   ],

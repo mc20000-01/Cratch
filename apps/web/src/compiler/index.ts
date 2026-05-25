@@ -6,9 +6,7 @@ export type StructuredCompileError = {
   message: string;
 };
 
-export type CompileResult =
-  | { ok: true; c: string }
-  | { ok: false; error: StructuredCompileError };
+export type CompileResult = { ok: true; c: string } | { ok: false; error: StructuredCompileError };
 
 type CompilerWasmBindings = {
   parse_and_validate_project_json: (json: string) => unknown;
@@ -17,15 +15,19 @@ type CompilerWasmBindings = {
 };
 
 function getWasmCompiler(): CompilerWasmBindings {
-  const compiler = (globalThis as { __SCRATCHLOWLEVEL_COMPILER_WASM__?: CompilerWasmBindings }).__SCRATCHLOWLEVEL_COMPILER_WASM__;
-  if (!compiler) throw new Error('compiler-wasm bindings are not initialized on globalThis.__SCRATCHLOWLEVEL_COMPILER_WASM__.');
+  const compiler = (globalThis as { __SCRATCHLOWLEVEL_COMPILER_WASM__?: CompilerWasmBindings })
+    .__SCRATCHLOWLEVEL_COMPILER_WASM__;
+  if (!compiler)
+    throw new Error(
+      'compiler-wasm bindings are not initialized on globalThis.__SCRATCHLOWLEVEL_COMPILER_WASM__.',
+    );
   return compiler;
 }
 
 export function parseAndValidateProject(project: Project): Project {
-  return deserializeProject(JSON.stringify(
-    getWasmCompiler().parse_and_validate_project_json(serializeProject(project)),
-  ));
+  return deserializeProject(
+    JSON.stringify(getWasmCompiler().parse_and_validate_project_json(serializeProject(project))),
+  );
 }
 
 export function compileProjectJsonToC(project: Project): string {

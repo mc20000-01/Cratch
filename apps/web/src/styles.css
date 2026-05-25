@@ -20,3 +20,27 @@ li { padding: 6px 0; display: grid; }
 pre { overflow: auto; padding: 12px; border-radius: 12px; background: #0a1018; max-height: 240px; }
 .hint { color: #8ca1c9; font-size: .9rem; }
 .diagnostics ul { margin-bottom: 12px; color: #ff9fa6; }
+
+.project-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.project-actions input {
+  display: block;
+}
+
+.error-banner {
+  color: #8b0000;
+  font-weight: 600;
+}
+
+.fatal-state {
+  margin: 2rem;
+  border: 1px solid #d66;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #fff4f4;
+}

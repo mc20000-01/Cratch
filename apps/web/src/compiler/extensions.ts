@@ -18,9 +18,7 @@ export type ExtensionManifest = {
 
 export function assertCompatibleApiVersion(apiVersion: number): void {
   if (apiVersion !== EXTENSION_API_VERSION) {
-    throw new Error(
-      `Incompatible extension apiVersion ${apiVersion}. Expected ${EXTENSION_API_VERSION}.`,
-    );
+    throw new Error(`Incompatible extension apiVersion ${apiVersion}. Expected ${EXTENSION_API_VERSION}.`);
   }
 }
 
@@ -62,20 +60,25 @@ export function validateExtensionManifestShape(input: unknown): ExtensionManifes
   if (!isRecord(loweringEntrypoints)) {
     throw new Error('Extension manifest field "loweringEntrypoints" must be an object.');
   }
-  const parsedEntrypoints = Object.entries(loweringEntrypoints).reduce<Record<string, string>>((acc, [blockId, fnName]) => {
-    assertString(blockId, 'loweringEntrypoints key');
-    assertString(fnName, `loweringEntrypoints.${blockId}`);
-    acc[blockId] = fnName;
-    return acc;
-  }, {});
+  const parsedEntrypoints = Object.entries(loweringEntrypoints).reduce<Record<string, string>>(
+    (acc, [blockId, fnName]) => {
+      assertString(blockId, 'loweringEntrypoints key');
+      assertString(fnName, `loweringEntrypoints.${blockId}`);
+      acc[blockId] = fnName;
+      return acc;
+    },
+    {},
+  );
 
-  const parsedRuntimeSnippets = runtimeSnippets?.map((snippet, index) => {
-    if (!isRecord(snippet)) throw new Error(`runtimeSnippets[${index}] must be an object.`);
-    const { language, code } = snippet;
-    if (language !== 'c') throw new Error(`runtimeSnippets[${index}].language must be \"c\".`);
-    assertString(code, `runtimeSnippets[${index}].code`);
-    return { language, code };
-  });
+  const parsedRuntimeSnippets = Array.isArray(runtimeSnippets)
+    ? runtimeSnippets.map((snippet: unknown, index: number) => {
+        if (!isRecord(snippet)) throw new Error(`runtimeSnippets[${index}] must be an object.`);
+        const { language, code } = snippet;
+        if (language !== 'c') throw new Error(`runtimeSnippets[${index}].language must be \"c\".`);
+        assertString(code, `runtimeSnippets[${index}].code`);
+        return { language: 'c' as const, code };
+      })
+    : undefined;
 
   return {
     id,
@@ -88,6 +91,8 @@ export function validateExtensionManifestShape(input: unknown): ExtensionManifes
 }
 
 export function loadBlocksFromManifests(rawManifests: unknown[]): BlockSpec[] {
-  const extensionBlocks = rawManifests.map(validateExtensionManifestShape).flatMap((manifest) => manifest.blocks);
+  const extensionBlocks = rawManifests
+    .map(validateExtensionManifestShape)
+    .flatMap((manifest) => manifest.blocks);
   return [...defaultBlocks, ...extensionBlocks];
 }
