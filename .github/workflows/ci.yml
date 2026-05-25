@@ -1,32 +1,19 @@
 name: ci
-
-on:
-  push:
-  pull_request:
-
+on: [pull_request]
 jobs:
-  rust-tests:
-    name: rust-tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Run compiler-core fixture matrix
-        run: cargo test -p compiler-core
-
-  web-tests:
-    name: web-tests
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Run web tests
-        run: pnpm --dir apps/web test
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test -p compiler-core

@@ -3,6 +3,7 @@
 A block-based, low-level programming scaffold for **web + desktop**.
 
 ## Stack
+
 - **Frontend**: React + TypeScript + Vite
 - **Desktop shell**: Tauri
 - **Compiler core**: Rust
@@ -10,6 +11,7 @@ A block-based, low-level programming scaffold for **web + desktop**.
 - **Future path**: wasm build for browser-side compilation
 
 ## What this scaffold includes
+
 - block registry
 - extension manifest schema
 - typed project model
@@ -19,6 +21,7 @@ A block-based, low-level programming scaffold for **web + desktop**.
 - project export/import wiring
 
 ## Repo layout
+
 ```text
 apps/
   web/        React/Vite editor
@@ -29,21 +32,23 @@ crates/
 ```
 
 ## Next steps
+
 1. Run `cargo test -p compiler-core`
 2. Hook the React editor to the shared project model
 3. Add wasm build for browser compilation
 4. Add optimization passes and ASM backend
 
 ## Notes
+
 This is a scaffold, not a finished product.
 Pin dependency versions before shipping.
 
-
 ## Extension docs
+
 See `docs/EXTENSIONS.md` for manifest schema, compatibility checks, and failure cases.
 
-
 ## Adding compiler fixtures
+
 Use fixtures to grow the compiler test matrix safely.
 
 1. Add a new case folder under `crates/compiler-core/tests/fixtures/valid/<case>` or `crates/compiler-core/tests/fixtures/invalid/<case>`.

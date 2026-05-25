@@ -1,84 +1,21 @@
-# Extension Manifest and Compatibility
+# Extension Authoring Guide
 
-ScratchLowLevel extensions are declared by a JSON manifest and are required to target the host `apiVersion`.
+## 1) Create a manifest
 
-## Manifest schema (minimal)
+Define `id`, `version`, `apiVersion`, `blocks`, and `loweringEntrypoints`.
 
-```json
-{
-  "id": "example.consts",
-  "version": "0.1.0",
-  "apiVersion": 1,
-  "blocks": [
-    {
-      "id": "example.const.answer",
-      "name": "answer",
-      "kind": "expression",
-      "category": "example"
-    }
-  ],
-  "loweringEntrypoints": {
-    "example.const.answer": "lower_answer"
-  },
-  "runtimeSnippets": [
-    {
-      "language": "c",
-      "code": "static inline int sl_answer(void) { return 42; }"
-    }
-  ]
-}
-```
+## 2) Keep compatibility
 
-## Enforced fields
+`apiVersion` must match `EXTENSION_API_VERSION` in host apps.
 
-- `id` (non-empty string)
-- `version` (non-empty string)
-- `apiVersion` (integer, must equal host API)
-- `blocks` (array of `{ id, name, kind, category }`)
-- `loweringEntrypoints` (`blockId -> lowering function name`)
-- `runtimeSnippets` optional, each snippet currently must use `language: "c"`.
+## 3) Block kinds
 
-## Failure cases
+Allowed kinds: `expression`, `statement`, `control`, `definition`.
 
-1. **Incompatible API version**
+## 4) Runtime snippets
 
-```json
-{ "id": "broken", "version": "1.0.0", "apiVersion": 99, "blocks": [], "loweringEntrypoints": {} }
-```
+Optional `runtimeSnippets` may include C helper code referenced by lowering.
 
-Fails with: `Incompatible extension apiVersion 99. Expected 1.`
+## 5) Validation workflow
 
-2. **Invalid block kind**
-
-```json
-{
-  "id": "broken.kind",
-  "version": "1.0.0",
-  "apiVersion": 1,
-  "blocks": [{ "id": "x", "name": "x", "kind": "widget", "category": "bad" }],
-  "loweringEntrypoints": {}
-}
-```
-
-Fails because `kind` must be one of `expression | statement | control | definition`.
-
-3. **Missing lowering entrypoint function name**
-
-```json
-{
-  "id": "broken.lowering",
-  "version": "1.0.0",
-  "apiVersion": 1,
-  "blocks": [],
-  "loweringEntrypoints": { "example.block": "" }
-}
-```
-
-Fails because lowering entrypoint values must be non-empty strings.
-
-## Where checks happen
-
-- **Web app entry**: startup compatibility assertion in `apps/web/src/main.tsx`.
-- **Web loader**: manifest shape validation before extension blocks are merged.
-- **Desktop app entry**: startup compatibility assertion in `apps/desktop/src-tauri/src/main.rs`.
-- **Rust core**: registry registration enforces `apiVersion` and provides lowering-hook lookup.
+Run `pnpm test` and verify the manifest loads via `loadBlocksFromManifests`.

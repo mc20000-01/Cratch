@@ -34,7 +34,10 @@ describe('wasm compiler bridge integration', () => {
 
   it('returns structured diagnostics for invalid fixture projects through wasm bridge', () => {
     for (const fixture of Object.values(invalidProjects)) {
-      expect(compileProjectJsonToCWithErrors(fixture.project)).toEqual({ ok: false, error: fixture.expectedError });
+      expect(compileProjectJsonToCWithErrors(fixture.project)).toEqual({
+        ok: false,
+        error: fixture.expectedError,
+      });
     }
   });
 });

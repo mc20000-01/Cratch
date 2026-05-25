@@ -46,12 +46,18 @@ function clone<T>(value: T): T {
 
 function stmtLabel(stmt: Stmt): string {
   switch (stmt.kind) {
-    case 'let': return `let ${stmt.name}`;
-    case 'assign': return `set ${stmt.name}`;
-    case 'expr': return 'expression';
-    case 'return': return 'return';
-    case 'if': return 'if';
-    case 'while': return 'while';
+    case 'let':
+      return `let ${stmt.name}`;
+    case 'assign':
+      return `set ${stmt.name}`;
+    case 'expr':
+      return 'expression';
+    case 'return':
+      return 'return';
+    case 'if':
+      return 'if';
+    case 'while':
+      return 'while';
   }
 }
 
@@ -79,21 +85,16 @@ function graphFromProject(project: Project): WorkspaceGraph {
   return { nodes, edges, roots };
 }
 
-function reorderFunctionBody(project: Project, functionName: string, orderedIds: string[]): Project {
-  const next = clone(project);
-  const fn = next.functions.find((item) => item.name === functionName);
-  if (!fn) return next;
-  const byId = new Map(fn.body.map((stmt) => [stmt.id, stmt]));
-  fn.body = orderedIds.map((id) => byId.get(id)).filter((v): v is Stmt => Boolean(v));
-  return next;
-}
-
 function mkStmt(kind: BlockKind, id: string): Stmt {
-  if (kind === 'let') return { id, kind: 'let', name: 'value', ty: 'i32', value: { id: `${id}_expr`, kind: 'int', value: 0 } };
-  if (kind === 'assign') return { id, kind: 'assign', name: 'value', value: { id: `${id}_expr`, kind: 'int', value: 1 } };
+  if (kind === 'let')
+    return { id, kind: 'let', name: 'value', ty: 'i32', value: { id: `${id}_expr`, kind: 'int', value: 0 } };
+  if (kind === 'assign')
+    return { id, kind: 'assign', name: 'value', value: { id: `${id}_expr`, kind: 'int', value: 1 } };
   if (kind === 'expr') return { id, kind: 'expr', value: { id: `${id}_expr`, kind: 'int', value: 1 } };
-  if (kind === 'if') return { id, kind: 'if', test: { id: `${id}_expr`, kind: 'bool', value: true }, then: [], otherwise: [] };
-  if (kind === 'while') return { id, kind: 'while', test: { id: `${id}_expr`, kind: 'bool', value: true }, body: [] };
+  if (kind === 'if')
+    return { id, kind: 'if', test: { id: `${id}_expr`, kind: 'bool', value: true }, then: [], otherwise: [] };
+  if (kind === 'while')
+    return { id, kind: 'while', test: { id: `${id}_expr`, kind: 'bool', value: true }, body: [] };
   return { id, kind: 'return', value: { id: `${id}_expr`, kind: 'int', value: 0 } };
 }
 
@@ -113,7 +114,8 @@ function buildProjectFromGraph(baseProject: Project, graph: WorkspaceGraph): Pro
 function validateGraph(graph: WorkspaceGraph): EditorDiagnostic[] {
   const diagnostics: EditorDiagnostic[] = [];
   for (const edge of graph.edges) {
-    if (!graph.nodes[edge.from] || !graph.nodes[edge.to]) diagnostics.push({ message: `Broken connection: ${edge.id}` });
+    if (!graph.nodes[edge.from] || !graph.nodes[edge.to])
+      diagnostics.push({ message: `Broken connection: ${edge.id}` });
   }
   return diagnostics;
 }
@@ -143,7 +145,9 @@ export class EditorStore {
 
   getSnapshot = (): EditorSnapshot => this.state;
 
-  private emit() { this.listeners.forEach((listener) => listener()); }
+  private emit() {
+    this.listeners.forEach((listener) => listener());
+  }
 
   private transact(mutator: (snapshot: EditorSnapshot) => EditorSnapshot) {
     this.undoStack.push(clone(this.state));
@@ -157,12 +161,20 @@ export class EditorStore {
     this.transact((snapshot) => {
       const id = `stmt_${Math.random().toString(36).slice(2, 9)}`;
       const baseNodes = Object.values(snapshot.graph.nodes).sort((a, b) => a.order - b.order);
-      const insertIndex = afterId ? Math.max(baseNodes.findIndex((node) => node.id === afterId) + 1, 0) : baseNodes.length;
+      const insertIndex = afterId
+        ? Math.max(baseNodes.findIndex((node) => node.id === afterId) + 1, 0)
+        : baseNodes.length;
       const newNode: WorkspaceNode = { id, kind, label: kind, functionName: 'main', order: insertIndex };
-      const arranged = [...baseNodes.slice(0, insertIndex), newNode, ...baseNodes.slice(insertIndex)]
-        .map((node, idx) => ({ ...node, order: idx }));
+      const arranged = [...baseNodes.slice(0, insertIndex), newNode, ...baseNodes.slice(insertIndex)].map(
+        (node, idx) => ({ ...node, order: idx }),
+      );
       snapshot.graph.nodes = Object.fromEntries(arranged.map((node) => [node.id, node]));
-      snapshot.graph.edges = arranged.slice(1).map((node, idx) => ({ id: `${arranged[idx].id}->${node.id}`, from: arranged[idx].id, to: node.id, type: 'flow' }));
+      snapshot.graph.edges = arranged.slice(1).map((node, idx) => ({
+        id: `${arranged[idx].id}->${node.id}`,
+        from: arranged[idx].id,
+        to: node.id,
+        type: 'flow',
+      }));
       snapshot.graph.roots = arranged[0] ? [arranged[0].id] : [];
       snapshot.selectedId = id;
       snapshot.project = buildProjectFromGraph(snapshot.project, snapshot.graph);
@@ -179,7 +191,12 @@ export class EditorStore {
       arranged.splice(targetIndex, 0, node);
       const normalized = arranged.map((item, idx) => ({ ...item, order: idx }));
       snapshot.graph.nodes = Object.fromEntries(normalized.map((item) => [item.id, item]));
-      snapshot.graph.edges = normalized.slice(1).map((item, idx) => ({ id: `${normalized[idx].id}->${item.id}`, from: normalized[idx].id, to: item.id, type: 'flow' }));
+      snapshot.graph.edges = normalized.slice(1).map((item, idx) => ({
+        id: `${normalized[idx].id}->${item.id}`,
+        from: normalized[idx].id,
+        to: item.id,
+        type: 'flow',
+      }));
       snapshot.graph.roots = normalized[0] ? [normalized[0].id] : [];
       snapshot.project = buildProjectFromGraph(snapshot.project, snapshot.graph);
       return snapshot;
@@ -188,10 +205,17 @@ export class EditorStore {
 
   deleteBlock = (id: string) => {
     this.transact((snapshot) => {
-      const arranged = Object.values(snapshot.graph.nodes).sort((a, b) => a.order - b.order).filter((node) => node.id !== id);
+      const arranged = Object.values(snapshot.graph.nodes)
+        .sort((a, b) => a.order - b.order)
+        .filter((node) => node.id !== id);
       const normalized = arranged.map((item, idx) => ({ ...item, order: idx }));
       snapshot.graph.nodes = Object.fromEntries(normalized.map((item) => [item.id, item]));
-      snapshot.graph.edges = normalized.slice(1).map((item, idx) => ({ id: `${normalized[idx].id}->${item.id}`, from: normalized[idx].id, to: item.id, type: 'flow' }));
+      snapshot.graph.edges = normalized.slice(1).map((item, idx) => ({
+        id: `${normalized[idx].id}->${item.id}`,
+        from: normalized[idx].id,
+        to: item.id,
+        type: 'flow',
+      }));
       snapshot.graph.roots = normalized[0] ? [normalized[0].id] : [];
       snapshot.selectedId = snapshot.selectedId === id ? normalized[0]?.id : snapshot.selectedId;
       snapshot.project = buildProjectFromGraph(snapshot.project, snapshot.graph);
@@ -208,12 +232,26 @@ export class EditorStore {
     });
   };
 
-  select = (id?: string) => { this.state = { ...this.state, selectedId: id }; this.emit(); };
+  select = (id?: string) => {
+    this.state = { ...this.state, selectedId: id };
+    this.emit();
+  };
   setCompilation = (debugCOutput: string, diagnostics: EditorDiagnostic[]) => {
     this.state = { ...this.state, debugCOutput, diagnostics: [...this.state.diagnostics, ...diagnostics] };
     this.emit();
   };
 
+  replaceProject = (project: Project) => {
+    this.transact((snapshot) => {
+      const graph = graphFromProject(project);
+      snapshot.project = clone(project);
+      snapshot.graph = graph;
+      snapshot.selectedId = graph.roots[0];
+      snapshot.debugCOutput = '';
+      snapshot.diagnostics = [];
+      return snapshot;
+    });
+  };
   undo = () => {
     const prev = this.undoStack.pop();
     if (!prev) return;
