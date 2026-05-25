@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './tokens.css';
 import './styles.css';
 import { assertCompatibleApiVersion, EXTENSION_API_VERSION } from './compiler/extensions';
 import { ErrorBoundary } from './ErrorBoundary';

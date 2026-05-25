@@ -7,7 +7,7 @@
     "build:web": "pnpm --dir apps/web build",
     "dev:desktop": "pnpm --dir apps/desktop tauri dev",
     "build:desktop": "pnpm --dir apps/desktop tauri build",
-    "lint": "eslint \"apps/web/src/**/*.{ts,tsx}\"",
+    "lint": "eslint \"apps/web/src/**/*.{ts,tsx}\" && pnpm --dir apps/web lint:styles",
     "format": "prettier --write \"{apps,docs,.github}/**/*.{ts,tsx,js,json,md,yml,yaml}\" \"*.{json,md}\"",
     "format:check": "prettier --check \"{apps,docs,.github}/**/*.{ts,tsx,js,json,md,yml,yaml}\" \"*.{json,md}\"",
     "typecheck": "pnpm --dir apps/web exec tsc --noEmit",

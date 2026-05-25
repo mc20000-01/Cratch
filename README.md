@@ -91,3 +91,7 @@ See `docs/EXTENSIONS.md` for manifest schema, compatibility checks, and failure 
 4. For invalid fixtures, add `expected.diagnostic` with the exact compiler error text.
 5. Mirror the case in `apps/web/src/compiler/__fixtures__/compiler-fixtures.ts` to keep wasm bridge integration tests in sync.
 6. Run `cargo test -p compiler-core` and `pnpm --dir apps/web test` before opening a PR.
+
+## Design system
+
+Frontend style tokens and usage guidance are documented in `docs/design-system.md`.
